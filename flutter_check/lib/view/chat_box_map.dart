@@ -1,3 +1,4 @@
+import 'package:flutter_check/model/message.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_check/view/map.dart';
 
@@ -11,7 +12,7 @@ class ChatBox extends StatefulWidget {
 class _ChatBoxState extends State<ChatBox> {
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
-  final List<String> messages = [];
+  final List<Message> messages = [];
   Color colors = Color.fromARGB(255, 255, 255, 255);
   Color colorsText = Color.fromARGB(255, 0, 0, 0);
   Color colorsLevel1 = Color.fromARGB(255, 78, 166, 224);
@@ -65,9 +66,6 @@ class _ChatBoxState extends State<ChatBox> {
                   icon: Icon(Icons.brightness_6, color: colorsText),
                 ),
 
-
-
-
                 IconButton(
                   onPressed: () {
                     Navigator.push(
@@ -77,11 +75,6 @@ class _ChatBoxState extends State<ChatBox> {
                   },
                   icon: Icon(Icons.map, color: colorsText),
                 ),
-
-                
-
-
-                
               ],
             ),
           ),
@@ -96,8 +89,7 @@ class _ChatBoxState extends State<ChatBox> {
                 Expanded(
                   child: ListView.builder(
                     itemCount: messages.length,
-                    itemBuilder: (_, index) =>
-                        _buildMessageTile(messages[index], colors),
+                    itemBuilder: (_, index) => _buildMessageTile(colors, index),
                     reverse: false,
                     controller: _scrollController,
                   ),
@@ -145,6 +137,9 @@ class _ChatBoxState extends State<ChatBox> {
                         border: const OutlineInputBorder(),
                       ),
                       style: TextStyle(color: colorsText, fontSize: 16.0),
+                      onSubmitted: (text) {
+                        _sendMessage(text.trim(), 'user');
+                      },
                     ),
                   ),
                   IconButton(
@@ -153,7 +148,7 @@ class _ChatBoxState extends State<ChatBox> {
                       color: Color.fromARGB(255, 78, 166, 224),
                     ),
                     onPressed: () {
-                      _sendMessage();
+                      _sendMessage(_controller.text.trim(), 'user');
                     },
                   ),
                 ],
@@ -165,35 +160,54 @@ class _ChatBoxState extends State<ChatBox> {
     );
   }
 
-  Widget _buildMessageTile(String message, Color colors) {
+  Widget _buildMessageTile(Color colors, int index) {
+    final check = messages[index].getId == 'user';
     return Align(
-      alignment: Alignment.centerRight,
+      alignment: check ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
         margin: const EdgeInsets.all(8.0),
         padding: const EdgeInsets.all(16.0),
         decoration: BoxDecoration(
-          color: Colors.blueAccent,
+          color: check ? Colors.blue : const Color.fromARGB(255, 132, 130, 130),
           borderRadius: BorderRadius.circular(8.0),
         ),
-        child: Text(
-          message,
-          style: TextStyle(color: colorsText, fontSize: 16.0),
+        child: Column(
+          children: [
+            Text(
+              messages[index].getContent,
+              style: TextStyle(color: colorsText, fontSize: 16.0),
+            ),
+            if (!check)
+              IconButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => MapPage()),
+                  );
+                },
+                icon: Icon(Icons.map_outlined, color: Colors.red, size: 30),
+              ),
+          ],
         ),
       ),
     );
   }
 
-  void _sendMessage() {
-    final message = _controller.text.trim();
-    if (message.isNotEmpty) {
+  void _sendMessage(String text, String role) async {
+    final text = _controller.text.trim();
+    if (text.isNotEmpty) {
       setState(() {
-        messages.add(message);
+        messages.add(Message(id: role, content: text));
         _controller.clear();
+      });
+      await Future.delayed(const Duration(milliseconds: 1500));
+      setState(() {
+        messages.add(Message(id: 'robot', content: 'Go to Map'));
       });
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _scrollController.animateTo(
           _scrollController.position.maxScrollExtent,
-          duration: Duration(milliseconds: 300),
+          duration: const Duration(milliseconds: 300),
           curve: Curves.easeOut,
         );
       });

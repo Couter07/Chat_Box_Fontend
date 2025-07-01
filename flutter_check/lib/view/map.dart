@@ -5,6 +5,8 @@ import 'package:geolocator/geolocator.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 class MapPage extends StatefulWidget {
+  const MapPage({super.key});
+
   @override
   _MapPageState createState() => _MapPageState();
 }
