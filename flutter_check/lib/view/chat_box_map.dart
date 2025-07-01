@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_check/view/map.dart';
 
 class ChatBox extends StatefulWidget {
   const ChatBox({super.key});
@@ -63,6 +64,24 @@ class _ChatBoxState extends State<ChatBox> {
                   },
                   icon: Icon(Icons.brightness_6, color: colorsText),
                 ),
+
+
+
+
+                IconButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => MapPage()),
+                    );
+                  },
+                  icon: Icon(Icons.map, color: colorsText),
+                ),
+
+                
+
+
+                
               ],
             ),
           ),
