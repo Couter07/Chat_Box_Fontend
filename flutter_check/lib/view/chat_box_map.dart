@@ -16,9 +16,26 @@ class _ChatBoxState extends State<ChatBox> {
   Color colors = Color.fromARGB(255, 255, 255, 255);
   Color colorsText = Color.fromARGB(255, 0, 0, 0);
   Color colorsLevel1 = Color.fromARGB(255, 78, 166, 224);
-  Color colorsLevel2 = Color.fromARGB(255, 78, 166, 224);
+  Color colorsLevel2 = Colors.blueGrey;
   Color colorsLevel3 = Color.fromARGB(255, 78, 166, 224);
   bool check = false;
+  bool showOptions = true;
+
+  @override
+  void initState() {
+    super.initState();
+    Future.delayed(const Duration(milliseconds: 500), () {
+      setState(() {
+        messages.insert(
+          0,
+          Message(
+            id: 'bot',
+            content: '👋 Xin chào! Bạn muốn tìm kiếm thông tin ở đâu?',
+          ),
+        );
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +43,7 @@ class _ChatBoxState extends State<ChatBox> {
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(60),
         child: Container(
-          color: colors,
+          color: colorsLevel1,
           padding: const EdgeInsets.symmetric(horizontal: 12),
           child: SafeArea(
             child: Row(
@@ -36,18 +53,17 @@ class _ChatBoxState extends State<ChatBox> {
                 ClipRRect(
                   borderRadius: BorderRadius.circular(24),
                   child: Image.asset(
-                    'assets/images/Robot_Icon.jpeg',
+                    'assets/images/Robot_icon.jpeg',
                     width: 45,
                     height: 45,
                     fit: BoxFit.cover,
                   ),
                 ),
-
                 // Tiêu đề ở giữa (dùng Expanded để canh giữa)
                 Expanded(
                   child: Center(
                     child: Text(
-                      'Chat Box Map',
+                      'EmoChat',
                       style: TextStyle(
                         color: colorsText,
                         fontSize: 25,
@@ -57,15 +73,6 @@ class _ChatBoxState extends State<ChatBox> {
                     ),
                   ),
                 ),
-
-                // Icon bên phải
-                IconButton(
-                  onPressed: () {
-                    _changeTheme();
-                  },
-                  icon: Icon(Icons.brightness_6, color: colorsText),
-                ),
-
                 IconButton(
                   onPressed: () {
                     Navigator.push(
@@ -83,7 +90,7 @@ class _ChatBoxState extends State<ChatBox> {
       body: Stack(
         children: [
           Container(
-            color: colors,
+            color: colorsLevel2,
             child: Column(
               children: [
                 Expanded(
@@ -103,53 +110,93 @@ class _ChatBoxState extends State<ChatBox> {
             left: 0,
             bottom: 0,
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
               decoration: BoxDecoration(
-                color: colors,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(30.0),
-                  topRight: Radius.circular(30.0),
-                ),
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black12,
+                    blurRadius: 4,
+                    offset: Offset(0, -1),
+                  ),
+                ],
               ),
-              child: Row(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  IconButton(
-                    onPressed: () {},
-                    icon: const Icon(
-                      Icons.camera_alt,
-                      color: Color.fromARGB(255, 78, 166, 224),
-                    ),
-                  ),
-                  Expanded(
-                    child: TextField(
-                      controller: _controller,
-                      decoration: InputDecoration(
-                        hintText: 'Type a message',
-                        hintStyle: const TextStyle(
-                          color: Color.fromARGB(255, 211, 219, 225),
-                        ),
-                        fillColor: colors,
-                        filled: true,
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 8,
-                        ),
-                        border: const OutlineInputBorder(),
+                  // ⬇ Nút chọn TikTok, Google, YouTube
+                  if (showOptions)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 4.0,
+                        vertical: 4.0,
                       ),
-                      style: TextStyle(color: colorsText, fontSize: 16.0),
-                      onSubmitted: (text) {
-                        _sendMessage(text.trim(), 'user');
-                      },
+                      child: Wrap(
+                        alignment: WrapAlignment.center,
+                        spacing: 8,
+                        children: [
+                          _buildOptionButton('TikTok'),
+                          _buildOptionButton('Google'),
+                          _buildOptionButton('YouTube'),
+                        ],
+                      ),
                     ),
-                  ),
-                  IconButton(
-                    icon: const Icon(
-                      Icons.send,
-                      color: Color.fromARGB(255, 78, 166, 224),
-                    ),
-                    onPressed: () {
-                      _sendMessage(_controller.text.trim(), 'user');
-                    },
+
+                  // ⬇ TextField + nút gửi
+                  Row(
+                    children: [
+                      IconButton(
+                        onPressed: () {
+                          setState(() {
+                            showOptions = !showOptions;
+                          });
+                        },
+                        icon: const Icon(
+                          Icons.more_vert,
+                          color: Color.fromARGB(255, 78, 166, 224),
+                          size: 26,
+                        ),
+                      ),
+                      Expanded(
+                        child: TextField(
+                          controller: _controller,
+                          decoration: InputDecoration(
+                            hintText: 'Nhập tin nhắn...',
+                            hintStyle: TextStyle(color: Colors.grey[500]),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 10,
+                            ),
+                            filled: true,
+                            fillColor: const Color(0xFFF0F2F5),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(25),
+                              borderSide: BorderSide.none,
+                            ),
+                          ),
+                          style: const TextStyle(fontSize: 16),
+                          onSubmitted: (text) {
+                            _sendMessage(text.trim(), 'user');
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      CircleAvatar(
+                        backgroundColor: const Color.fromARGB(
+                          255,
+                          78,
+                          166,
+                          224,
+                        ),
+                        child: IconButton(
+                          icon: const Icon(Icons.send, color: Colors.white),
+                          onPressed: () {
+                            _sendMessage(_controller.text.trim(), 'user');
+                          },
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -161,31 +208,51 @@ class _ChatBoxState extends State<ChatBox> {
   }
 
   Widget _buildMessageTile(Color colors, int index) {
-    final check = messages[index].getId == 'user';
+    final isUser = messages[index].getId == 'user';
+    final messageText = messages[index].getContent;
     return Align(
-      alignment: check ? Alignment.centerRight : Alignment.centerLeft,
+      alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
-        margin: const EdgeInsets.all(8.0),
-        padding: const EdgeInsets.all(16.0),
+        margin: const EdgeInsets.symmetric(vertical: 6.0, horizontal: 12.0),
+        padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 10.0),
         decoration: BoxDecoration(
-          color: check ? Colors.blue : const Color.fromARGB(255, 132, 130, 130),
-          borderRadius: BorderRadius.circular(8.0),
+          color: isUser ? Colors.blue[400] : const Color(0xFFE0E0E0),
+          borderRadius: BorderRadius.only(
+            topLeft: const Radius.circular(16),
+            topRight: const Radius.circular(16),
+            bottomLeft: Radius.circular(isUser ? 16 : 0),
+            bottomRight: Radius.circular(isUser ? 0 : 16),
+          ),
         ),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              messages[index].getContent,
-              style: TextStyle(color: colorsText, fontSize: 16.0),
+              messageText,
+              style: TextStyle(
+                color: isUser ? Colors.white : Colors.black87,
+                fontSize: 16.0,
+              ),
             ),
-            if (!check)
-              IconButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => MapPage()),
-                  );
-                },
-                icon: Icon(Icons.map_outlined, color: Colors.red, size: 30),
+            if (!isUser &&
+                messageText.toLowerCase().contains(
+                  "bản đồ",
+                )) // hoặc tùy điều kiện
+              Padding(
+                padding: const EdgeInsets.only(top: 6.0),
+                child: IconButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => MapPage()),
+                    );
+                  },
+                  icon: const Icon(
+                    Icons.map_outlined,
+                    color: Colors.red,
+                    size: 26,
+                  ),
+                ),
               ),
           ],
         ),
@@ -193,6 +260,7 @@ class _ChatBoxState extends State<ChatBox> {
     );
   }
 
+  // chatbot chat lai
   void _sendMessage(String text, String role) async {
     final text = _controller.text.trim();
     if (text.isNotEmpty) {
@@ -214,17 +282,20 @@ class _ChatBoxState extends State<ChatBox> {
     }
   }
 
-  void _changeTheme() {
-    setState(() {
-      if (check) {
-        check = false;
-        colors = Color.fromARGB(255, 255, 255, 255);
-        colorsText = Color.fromARGB(255, 50, 49, 49);
-      } else {
-        check = true;
-        colors = Color.fromARGB(255, 50, 49, 49);
-        colorsText = Color.fromARGB(255, 255, 255, 255);
-      }
-    });
+  Widget _buildOptionButton(String label) {
+    return ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.blue.shade100,
+        foregroundColor: Colors.blue.shade800,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      ),
+      onPressed: () {
+        _sendMessage("Tìm kiếm $label", 'user');
+        setState(() {
+          showOptions = false; // Ẩn nút sau khi chọn
+        });
+      },
+      child: Text(label),
+    );
   }
 }
